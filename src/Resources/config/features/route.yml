@@ -8,5 +8,6 @@ services:
         class: GtmPlugin\EventListener\AddRouteListener
         arguments:
             - "@google_tag_manager"
+            - "@GtmPlugin\\Resolver\\ChannelFeatureResolver"
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

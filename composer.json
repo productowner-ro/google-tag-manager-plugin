@@ -39,6 +39,9 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": false,
             "phpstan/extension-installer": false
+        },
+        "audit": {
+            "abandoned": "ignore"
         }
     },
     "autoload": {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GtmPlugin\EventListener;
 
+use GtmPlugin\Resolver\ChannelFeatureResolver;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Channel\Context\ChannelNotFoundException;
 use Sylius\Component\Currency\Context\CurrencyContextInterface;
@@ -21,16 +22,20 @@ final class ContextListener
 
     private CurrencyContextInterface $currencyContext;
 
+    private ?ChannelFeatureResolver $featureResolver;
+
     public function __construct(
         GoogleTagManagerInterface $googleTagManager,
         ChannelContextInterface $channelContext,
         LocaleContextInterface $localeContext,
-        CurrencyContextInterface $currencyContext
+        CurrencyContextInterface $currencyContext,
+        ?ChannelFeatureResolver $featureResolver = null,
     ) {
         $this->googleTagManager = $googleTagManager;
         $this->channelContext = $channelContext;
         $this->localeContext = $localeContext;
         $this->currencyContext = $currencyContext;
+        $this->featureResolver = $featureResolver;
     }
 
     public function onKernelRequest(RequestEvent $event): void
@@ -45,6 +50,10 @@ final class ContextListener
             if (!$event->isMasterRequest()) {
                 return;
             }
+        }
+
+        if ($this->featureResolver !== null && !$this->featureResolver->isEnabled('context')) {
+            return;
         }
 
         try {

@@ -29,5 +29,28 @@ final class GtmExtension extends Extension
                 $loader->load(\sprintf('features/%s.yml', $feature));
             }
         }
+
+        $container->setParameter('gtm.features', $config['features']);
+        $container->setParameter('gtm.channels', $this->normaliseChannels($config['channels'] ?? []));
+
+        $loader->load('channels.yml');
+    }
+
+    /**
+     * @param array<string, array{id?: ?string, enabled?: ?bool, features?: array<string, bool>}> $channels
+     *
+     * @return array<string, array{id: ?string, enabled: bool, features: array<string, bool>}>
+     */
+    private function normaliseChannels(array $channels): array
+    {
+        $normalised = [];
+        foreach ($channels as $code => $entry) {
+            $id = $entry['id'] ?? null;
+            $enabled = $entry['enabled'] ?? ($id !== null);
+            $features = $entry['features'] ?? [];
+            $normalised[$code] = ['id' => $id, 'enabled' => $enabled, 'features' => $features];
+        }
+
+        return $normalised;
     }
 }

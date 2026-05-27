@@ -9,5 +9,6 @@ services:
         arguments:
             - "@google_tag_manager"
             - "%kernel.environment%"
+            - "@GtmPlugin\\Resolver\\ChannelFeatureResolver"
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

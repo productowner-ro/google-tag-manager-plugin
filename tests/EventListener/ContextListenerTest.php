@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\GtmPlugin\EventListener;
 
 use GtmPlugin\EventListener\ContextListener;
+use GtmPlugin\Resolver\ChannelFeatureResolver;
 use PHPUnit\Framework\TestCase;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Core\Model\Channel;
@@ -51,5 +52,24 @@ final class ContextListenerTest extends TestCase
         $this->assertSame($gtm->getData()['currency'], 'EUR');
         $this->assertSame($gtm->getData()['channel']['code'], 'channelCode');
         $this->assertSame($gtm->getData()['channel']['name'], 'channelName');
+    }
+
+    public function testSkipsWhenResolverDisablesContextFeature(): void
+    {
+        $channelContext = $this->createMock(ChannelContextInterface::class);
+        $channelContext->expects($this->never())->method('getChannel');
+        $localeContext = $this->createMock(LocaleContextInterface::class);
+        $currencyContext = $this->createMock(CurrencyContextInterface::class);
+
+        $resolver = $this->createMock(ChannelFeatureResolver::class);
+        $resolver->method('isEnabled')->with('context')->willReturn(false);
+
+        $gtm = new GoogleTagManager(true, 'id1234');
+        $listener = new ContextListener($gtm, $channelContext, $localeContext, $currencyContext, $resolver);
+        $event = $this->getMockBuilder(RequestEvent::class)->disableOriginalConstructor()->getMock();
+        $event->method('isMainRequest')->willReturn(true);
+        $listener->onKernelRequest($event);
+
+        $this->assertArrayNotHasKey('channel', $gtm->getData());
     }
 }

@@ -18,3 +18,5 @@
 /phpspec.yml
 
 /node_modules
+
+/.docker/
