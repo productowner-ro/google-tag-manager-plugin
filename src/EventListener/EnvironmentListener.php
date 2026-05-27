@@ -28,16 +28,11 @@ final class EnvironmentListener
 
     public function onKernelRequest(RequestEvent $event): void
     {
-        if (method_exists($event, 'isMainRequest')) {
-            if (!$event->isMainRequest()) {
-                return;
-            }
-        }
-
-        if (method_exists($event, 'isMasterRequest')) {
-            if (!$event->isMasterRequest()) {
-                return;
-            }
+        $isMain = method_exists($event, 'isMainRequest')
+            ? $event->isMainRequest()
+            : $event->isMasterRequest();
+        if (!$isMain) {
+            return;
         }
 
         if ($this->featureResolver !== null && !$this->featureResolver->isEnabled('environment')) {
